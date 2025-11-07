@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orders Management - Benjamin's Shop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background: rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .sidebar-menu ul {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            padding: 15px 25px;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .sidebar-menu li:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-menu li.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid white;
+        }
+
+        .sidebar-menu i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, var(--light) 0%, #f1f3f9 100%);
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            color: var(--dark);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--gray);
+            color: var(--gray);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .table th, .table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--light) 0%, #f1f3f9 100%);
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table tr:hover {
+            background: rgba(67, 97, 238, 0.03);
+        }
+
+        /* Badge Styles */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-success {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+
+        .badge-warning {
+            background: rgba(248, 150, 30, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(248, 150, 30, 0.3);
+        }
+
+        .badge-danger {
+            background: rgba(247, 37, 133, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(247, 37, 133, 0.3);
+        }
+
+        /* Order Details */
+        .order-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+
+        .order-items {
+            margin: 15px 0;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid var(--light-gray);
+        }
+
+        .order-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+
+        .order-item-info {
+            flex: 1;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .order-item-meta {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--light-gray);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 15px 10px;
+            }
+            
+            .card-body {
+                padding: 15px;
+            }
+            
+            .table th, .table td {
+                padding: 10px 8px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--light-gray);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Dashboard</h2>
+            </div>
+            <div class="sidebar-menu">
+                <ul>
+                    <li onclick="window.location.href='admin-dashboard.html'">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </li>
+                    <!-- <li onclick="window.location.href='admin-dashboard.html#products-tab'">
+                        <i class="fas fa-box"></i> Products
+                    </li> -->
+                    <!-- <li class="active">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </li> -->
+                    <!-- <li>
+                        <i class="fas fa-users"></i> Customers
+                    </li> -->
+                    <li onclick="window.location.href='analytics.html'">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </li>
+                    <!-- <li>
+                        <i class="fas fa-cog"></i> Settings
+                    </li> -->
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Orders Management</h1>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span>Admin User</span>
+                    <button class="btn btn-outline" onclick="logout()" style="margin-left: 10px;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" id="total-orders">0</span>
+                    <span class="stat-label">Total Orders</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="pending-orders">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="completed-orders">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="total-revenue">Ksh 0</span>
+                    <span class="stat-label">Total Revenue</span>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label class="form-label">Search Order</label>
+                        <input type="text" class="form-control" id="search-order" placeholder="Search by order number...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-control" id="status-filter">
+                            <option value="">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Date Range</label>
+                        <input type="date" class="form-control" id="date-from">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <input type="date" class="form-control" id="date-to">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-filter"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>All Orders</h3>
+                    <div>
+                        <button class="btn btn-outline" onclick="refreshOrders()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-outline">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="orders-loading" class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading orders...</p>
+                    </div>
+                    <div id="orders-container" style="display: none;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order Number</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orders-table-body">
+                                <!-- Orders will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="no-orders" style="display: none; text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-shopping-cart" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                        <h3>No Orders Found</h3>
+                        <p>There are no orders matching your criteria.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://benjamins-shop.onrender.com/api';
+        let authToken = null;
+        let allOrders = [];
+        let filteredOrders = [];
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Check authentication
+            authToken = localStorage.getItem('adminToken');
+            if (!authToken) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Load orders
+            loadOrders();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Search functionality
+            document.getElementById('search-order').addEventListener('input', applyFilters);
+            document.getElementById('status-filter').addEventListener('change', applyFilters);
+            document.getElementById('date-from').addEventListener('change', applyFilters);
+            document.getElementById('date-to').addEventListener('change', applyFilters);
+        }
+
+        function getAuthToken() {
+            if (!authToken) {
+                authToken = localStorage.getItem('adminToken');
+            }
+            
+            if (!authToken) {
+                window.location.href = 'login.html';
+                throw new Error('No authentication token available');
+            }
+            
+            return authToken;
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'login.html';
+        }
+
+        // Load orders from API
+        async function loadOrders() {
+    try {
+        showLoading(true);
+        
+        const token = getAuthToken();
+        const response = await fetch(`${API_BASE_URL}/orders/admin/all`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+        
+        if (!response.ok) {
+            throw new Error(`Failed to load orders: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        allOrders = data.orders || [];
+        filteredOrders = [...allOrders];
+        
+        renderOrders();
+        updateStatistics(data.statistics);
+        
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        alert('Failed to load orders: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-order').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const dateFrom = document.getElementById('date-from').value;
+            const dateTo = document.getElementById('date-to').value;
+
+            filteredOrders = allOrders.filter(order => {
+                const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm) ||
+                                    order.customerInfo.name.toLowerCase().includes(searchTerm) ||
+                                    order.customerInfo.email.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || order.status === statusFilter;
+                
+                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+                const matchesDateFrom = !dateFrom || orderDate >= dateFrom;
+                const matchesDateTo = !dateTo || orderDate <= dateTo;
+                
+                return matchesSearch && matchesStatus && matchesDateFrom && matchesDateTo;
+            });
+            
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const ordersTableBody = document.getElementById('orders-table-body');
+            const ordersContainer = document.getElementById('orders-container');
+            const noOrders = document.getElementById('no-orders');
+            
+            ordersTableBody.innerHTML = '';
+            
+            if (filteredOrders.length === 0) {
+                ordersContainer.style.display = 'none';
+                noOrders.style.display = 'block';
+                return;
+            }
+            
+            noOrders.style.display = 'none';
+            ordersContainer.style.display = 'block';
+            
+            filteredOrders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Format date
+                const orderDate = new Date(order.createdAt);
+                const formattedDate = orderDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                // Get status badge class
+                const statusClass = getStatusClass(order.status);
+                
+                row.innerHTML = `
+                    <td>
+                        <strong>${order.orderNumber}</strong>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${order.customerInfo.name}</strong><br>
+                            <small>${order.customerInfo.email}</small><br>
+                            <small>${order.customerInfo.phone}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            ${order.items.map(item => 
+                                `${item.quantity}x ${item.productName}`
+                            ).join('<br>')}
+                        </div>
+                    </td>
+                    <td>
+                        <strong>Ksh ${order.totalAmount.toFixed(2)}</strong>
+                    </td>
+                    <td>
+                        <span class="badge ${statusClass}">
+                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                    </td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewOrderDetails('${order.orderNumber}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-outline btn-sm" onclick="updateOrderStatus('${order.orderNumber}')">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </td>
+                `;
+                
+                ordersTableBody.appendChild(row);
+            });
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'pending': return 'badge-warning';
+                case 'processing': return 'badge-success';
+                case 'shipped': return 'badge-primary';
+                case 'delivered': return 'badge-success';
+                case 'cancelled': return 'badge-danger';
+                default: return 'badge-secondary';
+            }
+        }
+
+        function updateStatistics(stats) {
+    const totalOrders = allOrders.length;
+    const pendingOrders = allOrders.filter(order => order.status === 'pending').length;
+    const completedOrders = allOrders.filter(order => order.status === 'delivered').length;
+    const totalRevenue = stats?.totalRevenue || allOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    
+    document.getElementById('total-orders').textContent = totalOrders;
+    document.getElementById('pending-orders').textContent = pendingOrders;
+    document.getElementById('completed-orders').textContent = completedOrders;
+    document.getElementById('total-revenue').textContent = `Ksh ${totalRevenue.toFixed(2)}`;
+}
+
+        function showLoading(show) {
+            const loadingElement = document.getElementById('orders-loading');
+            const ordersContainer = document.getElementById('orders-container');
+            const noOrders = document.getElementById('no-orders');
+            
+            if (show) {
+                loadingElement.style.display = 'block';
+                ordersContainer.style.display = 'none';
+                noOrders.style.display = 'none';
+            } else {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        function refreshOrders() {
+            loadOrders();
+        }
+
+        function viewOrderDetails(orderNumber) {
+            alert(`Viewing details for order: ${orderNumber}\n\nIn a real implementation, this would open a detailed view modal.`);
+            // You can implement a modal to show full order details
+        }
+
+        function updateOrderStatus(orderNumber) {
+            const order = allOrders.find(o => o.orderNumber === orderNumber);
+            if (!order) return;
+            
+            const newStatus = prompt(`Update status for order ${orderNumber}:`, order.status);
+            if (newStatus && newStatus !== order.status) {
+                // In real implementation, make API call to update status
+                alert(`Order ${orderNumber} status updated to: ${newStatus}`);
+                // Refresh orders after update
+                refreshOrders();
+            }
+        }
+
+        // Make functions globally available
+        window.logout = logout;
+        window.refreshOrders = refreshOrders;
+        window.viewOrderDetails = viewOrderDetails;
+        window.updateOrderStatus = updateOrderStatus;
+        window.applyFilters = applyFilters;
+    </script>
+</body>
+</html>

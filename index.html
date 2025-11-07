@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benjamin's Shop - Admin Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Splash Screen */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo i {
+            font-size: 50px;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #fff, #f0f0f0);
+            border-radius: 10px;
+            transition: width 2.5s ease-in-out;
+            animation: shimmer 2s infinite;
+        }
+
+        .loading-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Login Container (Hidden Initially) */
+        .login-container {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .login-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            transform: scale(0.9);
+            transition: transform 0.5s ease;
+        }
+
+        .login-container.show .login-content {
+            transform: scale(1);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo h1 {
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .login-logo p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .alert-error {
+            background: #fee;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .login-content {
+                padding: 30px 25px;
+                margin: 20px;
+            }
+
+            .logo-text {
+                font-size: 2rem;
+            }
+
+            .logo-subtitle {
+                font-size: 1rem;
+            }
+
+            .logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .logo i {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .login-content {
+                padding: 25px 20px;
+            }
+
+            .logo-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-store"></i>
+            </div>
+            <h1 class="logo-text">Benjamin's Shop</h1>
+            <p class="logo-subtitle">Admin Portal</p>
+        </div>
+        <div class="loading-bar">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <p class="loading-text">Initializing admin system...</p>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-content">
+            <div class="login-logo">
+                <h1>Welcome Back</h1>
+                <p>Admin Dashboard Login</p>
+            </div>
+            
+            <div id="alert" class="alert"></div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" required 
+                           autocomplete="email" placeholder="admin@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required 
+                           autocomplete="current-password" placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn" id="login-btn">
+                    <span id="btn-text">Sign In</span>
+                    <div id="btn-loading" class="loading" style="display: none;"></div>
+                </button>
+            </form>
+            
+            <div class="register-link">
+                <p>Need an admin account? <a href="#" id="register-link">Contact administrator</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configurationproxy
+        const API_BASE_URL = 'https://benjamins-shop.onrender.com/api';
+        let authToken = null;
+
+        // DOM Elements
+        const splashScreen = document.getElementById('splashScreen');
+        const loginContainer = document.getElementById('loginContainer');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const loginForm = document.getElementById('login-form');
+        const alertDiv = document.getElementById('alert');
+        const registerLink = document.getElementById('register-link');
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            startSplashScreen();
+        });
+
+        function startSplashScreen() {
+            // Simulate loading progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 2;
+                loadingProgress.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    transitionToLogin();
+                }
+            }, 50);
+        }
+
+        function transitionToLogin() {
+            // Add fade-out class to splash screen
+            splashScreen.classList.add('fade-out');
+            
+            // Show login container after a delay
+            setTimeout(() => {
+                splashScreen.style.display = 'none';
+                loginContainer.classList.add('show');
+                
+                // Check if already logged in
+                authToken = localStorage.getItem('adminToken');
+                if (authToken) {
+                    redirectToDashboard();
+                }
+            }, 800);
+        }
+
+        function redirectToDashboard() {
+            showAlert('Redirecting to dashboard...', 'success');
+            setTimeout(() => {
+                window.location.href = 'admin-dashboard.html';
+            }, 1000);
+        }
+
+        // Handle login form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showAlert('Please enter both email and password', 'error');
+                return;
+            }
+            
+            await handleLogin(email, password);
+        });
+
+        // Handle register link
+        registerLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showAlert('Please contact the system administrator to create an admin account.', 'error');
+        });
+
+        // Main login function
+        async function handleLogin(email, password) {
+            setLoading(true);
+            hideAlert();
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        path: '/admin/login',
+                        email: email,
+                        password: password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    localStorage.setItem('adminToken', authToken);
+                    
+                    showAlert('Login successful! Redirecting...', 'success');
+                    
+                    // Redirect to admin dashboard after short delay
+                    setTimeout(() => {
+                        window.location.href = 'admin-dashboard.html';
+                    }, 1000);
+                    
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Login failed');
+                }
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert(error.message || 'Login failed. Please try again.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // UI Helper functions
+        function setLoading(loading) {
+            const loginBtn = document.getElementById('login-btn');
+            const btnText = document.getElementById('btn-text');
+            const btnLoading = document.getElementById('btn-loading');
+            
+            if (loading) {
+                loginBtn.disabled = true;
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline-block';
+            } else {
+                loginBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        }
+
+        function showAlert(message, type) {
+            alertDiv.textContent = message;
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.display = 'block';
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideAlert();
+                }, 3000);
+            }
+        }
+
+        function hideAlert() {
+            alertDiv.style.display = 'none';
+        }
+
+        // Add some demo credentials for testing
+        function showDemoCredentials() {
+            // This is just for demonstration - remove in production
+            console.log('Demo Credentials:');
+            console.log('Email: admin@example.com');
+            console.log('Password: admin123');
+        }
+
+        // Call this function if you want to pre-fill demo credentials (for testing)
+        // showDemoCredentials();
+    </script>
+</body>
+</html>
